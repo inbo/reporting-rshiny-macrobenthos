@@ -1,4 +1,4 @@
-#' Run the woonuitbreidingsgebieden application
+#' Run the macrobenthos application
 #' @return no return value
 #' @importFrom shiny runApp
 #' @export
