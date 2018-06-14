@@ -1,33 +1,60 @@
-#
-# This is the user-interface definition of a Shiny web application. You can
-# run the application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-# 
-#    http://shiny.rstudio.com/
-#
+jscode <- '
+$(document).on("shiny:connected", function(e) {
+var jsHeight = window.innerHeight;
+Shiny.onInputChange("GetScreenHeight",jsHeight);
+});
+'
 
-library(shiny)
-
-# Define UI for application that draws a histogram
 shinyUI(fluidPage(
-  
-  # Application title
-  titlePanel("Old Faithful Geyser Data"),
-  
-  # Sidebar with a slider input for number of bins 
-  sidebarLayout(
-    sidebarPanel(
-       sliderInput("bins",
-                   "Number of bins:",
-                   min = 1,
-                   max = 50,
-                   value = 30)
+  theme = shinytheme("united"),
+  # themeSelector(),
+  titlePanel(paste0("Monitoring macrobenthos Zeeschelde en getijgebonden zijrivieren (",
+                    min(dens$jaar),"-", max(dens$jaar),")")),
+  fluidRow(
+    column(3, selectizeInput(inputId = "soort", label = "soort",
+                             options = list(dropdownParent = 'body'),
+                             choices = sort(unique(dens$soort))
+    )),
+    column(3, selectizeInput(inputId = "variabele", label = "variabele",
+                             options = list(dropdownParent = 'body'),
+                             choices = c("densiteit", "biomassa")
+    )),
+    column(3, selectizeInput(inputId = "jaar", label = "jaar",
+                             options = list(dropdownParent = 'body'),
+                             choices = c("alle jaren", sort(unique(as.character(dens$jaar)), decreasing = TRUE))
+    )),
+    column(3, selectizeInput(inputId = "tidaal", label = "tidaal",
+                             options = list(dropdownParent = 'body'),
+                             choices = c("beide","inter","sub")
+    ))
+  ),
+  tabsetPanel(
+    tabPanel("Kaart",
+             fluidRow(
+               # column(2, tableOutput("loctab")),
+               column(8, offset = 2,
+                      tags$script(jscode),
+                      uiOutput("leafl1")
+                      # leafletOutput("map", width = "100%", height = "650px")
+               )
+             )),
+    tabPanel("Grafieken",
+             sidebarPanel(width = 2,
+                          radioButtons('gt1', 'Selecteer type grafiek',
+                                       c(variabele = 'dens1',
+                                         'aantal stalen' = 'cnt1'),
+                                       selected = 'dens1')
+             ),
+             mainPanel(width = 10,
+                       fluidRow(
+                         column(8,
+                                # offset=1,
+                                plotOutput("grafiek1", width = "130%",
+                                           height = "700px")))
+             )
     ),
-    
-    # Show a plot of the generated distribution
-    mainPanel(
-       plotOutput("distPlot")
-    )
+    tabPanel("Tabel",
+             fluidRow(column(8, dataTableOutput("tabel"))
+             ))
   )
 ))
