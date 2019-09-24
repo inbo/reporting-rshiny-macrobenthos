@@ -4,6 +4,9 @@ files:
   - source: /
     destination: /home/ubuntu/reporting-rshiny-macrobenthos
 hooks:
+  BeforeInstall:
+    - location: scripts/cleanup-reporting-rshiny-macrobenthos.sh
+      timeout: 300
   AfterInstall:
     - location: scripts/reporting-rshiny-macrobenthos.sh
       timeout: 1000
